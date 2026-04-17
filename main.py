@@ -1,7 +1,7 @@
 # StopLightSim.py
-# Name:
-# Date:
-# Assignment:
+# Name:Gavin Grow
+# Date:4/17/26
+# Assignment:create a simulation 
 
 import simpy
 
@@ -14,14 +14,14 @@ def stopLight(env):
     global greenLight
 
     while True:
-        print("Green at time", env.now)
+        print("Green")
         greenLight = True
         yield env.timeout(30)
 
-        print("Yellow at time", env.now)
+        print("Yellow")
         yield env.timeout(2)
 
-        print("Red at time", env.now)
+        print("Red")
         greenLight = False
         yield env.timeout(20)
 
@@ -29,12 +29,13 @@ def stopLight(env):
 def car(env, car_id):
     """Simulates a car arriving and waiting for the light."""
     
-    print("Car", car_id, "arrived at", env.now)
+    print("Car", car_id, ": Arrived at", env.now)
 
-    # TODO: Make the car wait while the light is red
-    # Hint: use a loop and env.timeout(1)
+    # Make the car wait while the light is red
+    while not greenLight:
+        yield env.timeout(1)
 
-    print("Car", car_id, "departed at", env.now)
+    print("Car", car_id, ": Departed at", env.now)
 
 
 def carArrival(env):
@@ -44,9 +45,9 @@ def carArrival(env):
 
     while True:
         car_id += 1
-        print("Creating Car", car_id)
 
-        # TODO: Start a new car process
+        # Start a new car process
+        env.process(car(env, car_id))
 
         yield env.timeout(5)
 
@@ -56,13 +57,16 @@ def main():
 
     # Start processes
     env.process(stopLight(env))
-    
-    # TODO: Start the carArrival process
+    env.process(carArrival(env))
 
     # Run simulation
     env.run(until=100)
 
     print("Simulation complete")
+
+
+if __name__ == "__main__":
+    main()
 
 
 if __name__ == "__main__":
